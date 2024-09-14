@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "bunx --bun vite",
+    "build": "bun x vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
   },
@@ -19,6 +19,10 @@
     "vite": "^5.4.1"
   },
   "trustedDependencies": [
+    "esbuild",
     "svelte-preprocess"
-  ]
+  ],
+  "dependencies": {
+    "@types/node": "^22.5.5"
+  }
 }
