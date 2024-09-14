@@ -38,7 +38,7 @@
         cursor: pointer;
     }
     .profile-pic {
-        width: 5rem;
+        width: 3rem;
         border-radius: 999px;
         border: 2px solid var(--text);
         user-select: none;
