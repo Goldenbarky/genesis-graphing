@@ -23,6 +23,7 @@
     "svelte-preprocess"
   ],
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
     "@types/node": "^22.5.5"
   }
 }
