@@ -1,29 +1,28 @@
 {
-  "name": "genesis-graphing",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "bunx --bun vite",
-    "build": "bun x vite build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
-  },
-  "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^3.1.1",
-    "@tsconfig/svelte": "^5.0.4",
-    "svelte": "^4.2.18",
-    "svelte-check": "^3.8.5",
-    "tslib": "^2.6.3",
-    "typescript": "^5.5.3",
-    "vite": "^5.4.1"
-  },
-  "trustedDependencies": [
-    "esbuild",
-    "svelte-preprocess"
-  ],
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
-    "@types/node": "^22.5.5"
-  }
+    "name": "genesis-graphing",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "bunx --bun vite",
+        "build": "bun x vite build",
+        "preview": "vite preview",
+        "check": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.node.json"
+    },
+    "devDependencies": {
+        "@sveltejs/vite-plugin-svelte": "^3.1.1",
+        "@tsconfig/svelte": "^5.0.4",
+        "svelte": "^4.2.18",
+        "svelte-check": "^3.8.5",
+        "tslib": "^2.6.3",
+        "typescript": "^5.5.3",
+        "vite": "^5.4.1",
+        "@supabase/supabase-js": "^2.45.4",
+        "@types/node": "^22.5.5"
+    },
+    "trustedDependencies": [
+        "esbuild",
+        "svelte-preprocess"
+    ],
+    "dependencies": {}
 }

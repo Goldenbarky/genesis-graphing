@@ -1,20 +1,27 @@
 <script lang="ts">
-    import { signInWithGoogle } from "./GenericFunctions";
+    import { getContext } from "svelte";
+    import type { Writable } from "svelte/store";
+    import { signInWithGoogle } from "./Supabase.svelte";
+    import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
 
-    export let user;
+    const { supabase, session } = getContext<{
+        supabase: SupabaseClient;
+        session: Writable<AuthSession | null>;
+    }>("supabase");
 </script>
-<div class="column custom-column" style="flex: none;">
-    {#if !user}
-        <button class="custom-box custom-button" 
-            on:click={async () => await signInWithGoogle()}>
+
+<div class="custom-column" style="flex: none;">
+    {#if !$session || !$session.user}
+        <button class="custom-button" on:click={signInWithGoogle}>
             Log in
         </button>
     {:else}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <img src={user.user_metadata.avatar_url} class="profile-pic"/>
+        <img src={$session.user.user_metadata.avatar_url} class="profile-pic" />
     {/if}
 </div>
-<style lang="scss">
+
+<style>
     .custom-column {
         padding-top: 0;
         padding-bottom: 0;
