@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DataEntry from "./lib/DataEntry.svelte";
+    import LinePlot from "./lib/LinePlot.svelte";
 	import Login from "./lib/Login.svelte";
     import ScatterPlot from "./lib/ScatterPlot.svelte";
 	import Supabase from "./lib/Supabase.svelte";
@@ -17,7 +18,7 @@
 				</div>
 				<div class="main-window">
 					<div class="graph">
-						<ScatterPlot/>
+						<LinePlot/>
 					</div>
 					<div class="side-window">
 						<div>

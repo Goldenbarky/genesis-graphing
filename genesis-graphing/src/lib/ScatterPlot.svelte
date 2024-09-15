@@ -41,7 +41,9 @@
         console.log(meData);
         meData?.forEach((point) => {
             let date = new Date(point.created_at);
-            let time = date.toLocaleTimeString("en-US");
+            let time = date.toTimeString();
+
+            console.log(time);
 
             myX.push(timestampToHourFraction(time));
             myY.push(point.value);
