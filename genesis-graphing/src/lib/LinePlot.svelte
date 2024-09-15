@@ -43,9 +43,6 @@
 
     onMount(async () => {
         const { data: meData } = await supabase.from("eod_equations").select("*");
-        let myX: number[] = [];
-        let myY: number[] = [];
-        console.log(meData);
         meData?.forEach((eq) => {
             let eq_data = JSON.parse(eq.eq_data);
             coeffs = eq_data.coefs;
@@ -54,14 +51,13 @@
         xVals = linspace(8, 17, 100);
         yVals = PolyCoefficients(xVals, coeffs);
         colorVals = [0];
-        points = xVals.map((x, i) => ({
-            x: x,
-            y: yVals[i],
-            color: 0
-        }));
-
-        console.log(points);
     });
+
+    $: points = xVals.map((x, i) => ({
+        x: x,
+        y: yVals[i],
+        color: 0
+    }));
 
     const marginTop = 41; // the top margin, in pixels
     const marginRight = 0; // the right margin, in pixels
@@ -77,7 +73,7 @@
     const horizontalGrid = true; // show horizontal grid lines
     const verticalGrid = true; // show vertical grid lines
     const colors = ['#F50057','#42A5F5','#26A69A','#9575CD']; // fill color for dots && number of colors in fill array MUST match number of subsets in data
-    const showDots = false; // whether dots should be displayed
+    const showDots = true; // whether dots should be displayed
     const dotsFilled = true; // whether dots should be filled or outlined
     const r = 5; // (fixed) radius of dots, in pixels
     const strokeWidth = 3; // stroke width of line, in pixels
@@ -89,7 +85,7 @@
     const xScalefactor = width / 80; //y-axis number of values
     const yScalefactor = height / 40; //y-axis number of values
     const curve = curveLinear; // method of interpolation between points
-    const xType = scaleUtc; // type of x-scale
+    const xType = scaleLinear; // type of x-scale
     const insetTop = inset; // inset from top
     const insetRight = inset; // inset from right
     const insetBottom = inset; // inset fro bottom
@@ -130,7 +126,6 @@
     const yDomain = [0, 10];
     const xScale = xType(xDomain, xRange);
     const yScale = yType(yDomain, yRange);
-    const niceY = scaleLinear().domain([0, Math.max(...yVals)]).nice();
   
     const chartLine = line()
       .defined(i => cleanData[i])
@@ -150,9 +145,8 @@
     const delaunayGrid = Delaunay.from(pointsScaled);
     const voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]);
     
-    const  xTicks = xScale.ticks(xScalefactor);
-    const  xTicksFormatted = xTicks.map((el) => el.getFullYear());
-    const  yTicks = niceY.ticks(yScalefactor);
+    const xTicks = xScale.ticks(xScalefactor);
+    const yTicks = yScale.ticks(yScalefactor);
   </script>
   
   <div class="chart-container">
@@ -212,7 +206,7 @@
             {#if verticalGrid}
               <line class="tick-grid" y2={-height + 70} />
             {/if}
-            <text font-size='8px' x={-marginLeft/4} y="20">{xTicksFormatted[i] + xFormat}</text>
+            <text font-size='8px' x={-marginLeft/4} y="20">{xTicks[i] + xFormat}</text>
           </g>
         {/each}
         <text x={width - marginLeft - marginRight - 40} y={marginBottom}>{xLabel}</text>
