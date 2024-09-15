@@ -1,4 +1,5 @@
 <script lang="ts">
+	import DataEntry from "./lib/DataEntry.svelte";
 	import Login from "./lib/Login.svelte";
     import ScatterPlot from "./lib/ScatterPlot.svelte";
 	import Supabase from "./lib/Supabase.svelte";
@@ -17,6 +18,12 @@
 				<div class="main-window">
 					<div class="graph">
 						<ScatterPlot/>
+					</div>
+					<div class="side-window">
+						<div>
+							
+						</div>
+						<DataEntry/>
 					</div>
 				</div>
 			</div>
@@ -38,12 +45,20 @@
 		width: 100%;
 		height: 100%;
 	}
+	.side-window {
+		display: grid;
+		grid-template-rows: 9fr 1fr;
+		grid-template-columns: 1fr;
+		width: 100%;
+		height: 100%;
+	}
 	.header {
 		font-size: 2rem;
 		text-align: left;
 	}
 	.graph {
 		background-color: #004669;
+		margin-right: 0.5rem;
 	}
 	.tool-panel {
 		display: flex;

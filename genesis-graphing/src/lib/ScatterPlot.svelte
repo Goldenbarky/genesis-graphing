@@ -1,6 +1,48 @@
 <script lang="ts">
     import { scaleLinear, Delaunay } from 'd3';
-    import data from '../test_data.json' // or pass data to component as prop
+
+    import { getContext } from "svelte";
+    import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
+    import type { Writable } from "svelte/store";
+
+    // import data from "../test_data.json";
+
+    const { supabase, session } = getContext<{
+        supabase: SupabaseClient;
+        session: Writable<AuthSession | null>;
+    }>("supabase");
+
+    let regex = new RegExp('([0-9]{2}):([0-9]{2}):([0-9]{2})');
+    const timestampToHourFraction = (time:string) => {
+        let match = regex.exec(time);
+        if(!match) return -1;
+
+        let time_value = parseInt(match[1]);
+        time_value += parseInt(match[2]) / 60;
+        time_value += parseInt(match[3]) / 6000;
+
+        time_value = Math.round(time_value * 100) / 100;
+
+        return time_value;
+    }
+
+    let data:{
+        'x':number[],
+        'y':number[]
+    } = {
+        'x':[],
+        'y':[]
+    }
+
+    supabase.from("data").select("*").then((s) => s.data.forEach((point) => {
+        let date = new Date(point.created_at);
+        let time = date.toLocaleTimeString("en-US");
+
+        data.x.push(timestampToHourFraction(time));
+        data.y.push(point.value);
+    }));
+
+    console.log(data);
     
     const r = 3; // (fixed) radius of dots, in pixels
     const marginTop = 20; // the top margin, in pixels
@@ -16,8 +58,8 @@
     const height = 600; // the outer height of the chart, in pixels
     const xLabel = 'Time →'; // a label for the x-axis
     const yLabel = '↑ Sanity'; // a label for the y-axis
-    const xFormat = 'kg'; // a format specifier string for the x-axis
-    const yFormat = 'cm'; // a format specifier string for the y-axis
+    const xFormat = 'hrs'; // a format specifier string for the x-axis
+    const yFormat = ''; // a format specifier string for the y-axis
     const xScalefactor = 9; //x-axis number of values
     const yScalefactor = 10; //y-axis number of values
       // number of colors in fill array MUST match number of subsets in data
@@ -58,8 +100,8 @@
     //     });
     // }
   
-    const xDomain = [0, Math.max(...xVals)];
-    const yDomain = [0, Math.max(...yVals)];
+    const xDomain = [8, 17];
+    const yDomain = [0, 10];
     const xScale = xType(xDomain, xRange);
     const yScale = yType(yDomain, yRange);
   
@@ -75,6 +117,8 @@
         for (let i = 1; i < xScalefactor + 1; i++) {
             reactiveXTicks.push(i * reactiveUnit);
         }
+
+        console.log(reactiveXTicks);
     }
   
     $: {
@@ -114,7 +158,7 @@
       <g class="x-axis" transform="translate(0,{height - marginBottom})">
         <path class="domain" stroke="black" d="M{marginLeft}, 0.5 H{width}"/>
         {#each reactiveXTicks as tick, i}
-          <g class="tick" transform="translate({xScale(tick)}, 0)">
+          <g class="tick" transform="translate({xScale(i + 1)}, 0)">
             <line class="tick-start" stroke='black' y2='6' />
             <line class="tick-grid" y2="-{height - marginTop}" />
             <text x={-marginLeft} y="20">{tick + xFormat}</text>
