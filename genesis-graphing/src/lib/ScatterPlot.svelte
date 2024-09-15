@@ -1,11 +1,11 @@
 <script lang="ts">
     import { scaleLinear, Delaunay } from 'd3';
 
-    import { getContext } from "svelte";
+    import { getContext, onMount } from "svelte";
     import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
     import type { Writable } from "svelte/store";
 
-    import data from "../test_data.json";
+    // import data from "../test_data.json";
 
     const { supabase, session } = getContext<{
         supabase: SupabaseClient;
@@ -26,23 +26,33 @@
         return time_value;
     }
 
-    // let data:{
-    //     'x':number[],
-    //     'y':number[]
-    // } = {
-    //     'x':[],
-    //     'y':[]
-    // }
+    let data:{
+        'x':number[],
+        'y':number[]
+    } = {
+        'x':[],
+        'y':[]
+    }
 
-    supabase.from("data").select("*").then((s) => s.data.forEach((point) => {
-        let date = new Date(point.created_at);
-        let time = date.toLocaleTimeString("en-US");
+    onMount(async () => {
+        const { data: meData } = await supabase.from("data").select("*");
+        let myX: number[] = [];
+        let myY: number[] = [];
+        console.log(meData);
+        meData?.forEach((point) => {
+            let date = new Date(point.created_at);
+            let time = date.toLocaleTimeString("en-US");
 
-        data.x.push(timestampToHourFraction(time));
-        data.y.push(point.value);
-    }));
+            myX.push(timestampToHourFraction(time));
+            myY.push(point.value);
+        });
+        data = {
+            x: myX,
+            y: myY,
+        };
+    });
 
-    console.log(data);
+    $: console.log(data);
     
     const r = 3; // (fixed) radius of dots, in pixels
     const marginTop = 20; // the top margin, in pixels
@@ -75,16 +85,12 @@
   
     let x = "x";
     let y = "y";
-    let xVals:number[] = [];
-    let yVals:number[] = [];
-    let selectedDot: number | null, dotInfo: (number | any[] | (FocusEvent & { currentTarget: EventTarget & SVGPathElement; }))[] | (string | number)[] | null, subsets, points = [];
+    let selectedDot: number | null, dotInfo: (number | any[] | (FocusEvent & { currentTarget: EventTarget & SVGPathElement; }))[] | (string | number)[] | null, subsets = [];
     let reactiveUnit, reactiveXTicks: number[], reactiveYTicks: number[];
     $: reactiveFilters = [...colors];
 
     // For a single set of data
-    xVals = data.x
-    yVals = data.y
-    points = data.x.map((x, i) => [x, data.y[i], 0])
+    $: points = data.x.map((x, i) => [x, data.y[i], 0])
     // For data with subsets (NOTE: expects 'id' and 'data' keys)
     // else {
     //     x = Object.keys(data[0]?.data[0])[0];
@@ -117,8 +123,6 @@
         for (let i = 1; i < xScalefactor + 1; i++) {
             reactiveXTicks.push(i * reactiveUnit + xDomain[0]);
         }
-
-        console.log(reactiveXTicks);
     }
   
     $: {
