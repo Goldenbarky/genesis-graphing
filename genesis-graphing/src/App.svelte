@@ -2,6 +2,7 @@
 	import DataEntry from "./lib/DataEntry.svelte";
     import LinePlot from "./lib/LinePlot.svelte";
 	import Login from "./lib/Login.svelte";
+    import NewScatterPlot from "./lib/NewScatterPlot.svelte";
     import ScatterPlot from "./lib/ScatterPlot.svelte";
 	import Supabase from "./lib/Supabase.svelte";
 </script>
@@ -18,7 +19,7 @@
 				</div>
 				<div class="main-window">
 					<div class="graph">
-						<LinePlot/>
+                        <NewScatterPlot />
 					</div>
 					<div class="side-window">
 						<div>
@@ -42,7 +43,7 @@
 	.main-window {
 		display: grid;
 		grid-template-rows: 1fr;
-		grid-template-columns: 7fr 3fr;
+		grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
 		width: 100%;
 		height: 100%;
 	}

@@ -25,5 +25,9 @@
     "esbuild",
     "svelte-preprocess"
   ],
+<<<<<<< HEAD
   "dependencies": { "d3": "^7.9.0", "svelte-awesome-color-picker": "^3.1.4" }
+=======
+  "dependencies": { "d3": "^7.9.0", "d3-regression": "^1.3.10" }
+>>>>>>> 99eea4acf80632b09e8fdad33110417299b1294f
 }

@@ -1,65 +1,9 @@
-<script lang="ts">
+<script>
+    // @ts-nocheck
     import { line, curveLinear, Delaunay, range, scaleLinear, scaleUtc } from 'd3';
+    import data from './line-data';
     
-    import { getContext, onMount } from "svelte";
-    import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
-    import type { Writable } from "svelte/store";
-
-    // import data from "../test_data.json";
-
-    const { supabase, session } = getContext<{
-        supabase: SupabaseClient;
-        session: Writable<AuthSession | null>;
-    }>("supabase");
-
-    const linspace = (start:number, stop:number, num:number, endpoint = true) => {
-        const div = endpoint ? (num - 1) : num;
-        const step = (stop - start) / div;
-        return Array.from({length: num}, (_, i) => start + step * i);
-    }
-
-    const PolyCoefficients = (xVals:number[], coeffs:number[]) => {
-        // Returns a polynomial for ``x`` values for the ``coeffs`` provided.
-        // The coefficients must be in ascending order (``x**0`` to ``x**o``). 
-
-        let o = coeffs.length;
-        console.log(`# This is a polynomial of order ${o}.`);
-
-        let yVals:number[] = [];
-
-        xVals.forEach(x => {
-            y = 0;
-            for(let i = 0; i < o; i++) {
-                y += coeffs[i]*x**i;
-            }
-            yVals.push(y);
-        })
-        
-        return yVals;
-    }
-
-    let x, y, dotInfo, lines, xVals:number[] = [], yVals:number[] = [], points = [], subsets = [], colorVals = [];
-    let coeffs:number[] = [];
-
-    onMount(async () => {
-        const { data: meData } = await supabase.from("eod_equations").select("*");
-        meData?.forEach((eq) => {
-            let eq_data = eq.eq_data;
-            coeffs = eq_data.coefs;
-        });
-
-        xVals = linspace(8, 17, 100);
-        yVals = PolyCoefficients(xVals, coeffs);
-        colorVals = [0];
-    });
-
-    $: points = xVals.map((x, i) => ({
-        x: x,
-        y: yVals[i],
-        color: 0
-    }));
-
-    const marginTop = 41; // the top margin, in pixels
+    const marginTop = 40; // the top margin, in pixels
     const marginRight = 0; // the right margin, in pixels
     const marginBottom = 30; // the bottom margin, in pixels
     const marginLeft = 50; // the left margin, in pixels
@@ -69,14 +13,14 @@
     const xLabel = ''; // a label for the y-axis
     const yLabel = '↑ Population (in millions)'; // a label for the y-axis
     const xFormat = ''; // a format specifier string for the y-axis
-    const yFormat = ''; // a format specifier string for the y-axis
+    const yFormat = 'm'; // a format specifier string for the y-axis
     const horizontalGrid = true; // show horizontal grid lines
     const verticalGrid = true; // show vertical grid lines
     const colors = ['#F50057','#42A5F5','#26A69A','#9575CD']; // fill color for dots && number of colors in fill array MUST match number of subsets in data
     const showDots = true; // whether dots should be displayed
     const dotsFilled = true; // whether dots should be filled or outlined
     const r = 5; // (fixed) radius of dots, in pixels
-    const strokeWidth = 3; // stroke width of line, in pixels
+    const strokeWidth = 5; // stroke width of line, in pixels
     const strokeOpacity = 0.8; // stroke opacity of line
     const tooltipBackground = 'white'; // background color of tooltip
     const tooltipTextColor = 'black'; // text color of tooltip
@@ -85,7 +29,7 @@
     const xScalefactor = width / 80; //y-axis number of values
     const yScalefactor = height / 40; //y-axis number of values
     const curve = curveLinear; // method of interpolation between points
-    const xType = scaleLinear; // type of x-scale
+    const xType = scaleUtc; // type of x-scale
     const insetTop = inset; // inset from top
     const insetRight = inset; // inset from right
     const insetBottom = inset; // inset fro bottom
@@ -93,41 +37,53 @@
     const xRange = [marginLeft + insetLeft, width - marginRight - insetRight]; // [left, right]
     const yType = scaleLinear; // type of y-scale
     const yRange = [height - marginBottom - insetBottom, marginTop + insetTop]; // [bottom, top]
-      
+  
+    let x, y, dotInfo, lines, xVals = [], yVals = [], points = [], subsets = [], colorVals = [];
+    
     // For a single set of data
-    x = 'x';
-    y = 'y';
-
+    if (!('data' in data[0])) {
+      x = Object.keys(data[0])[0];
+      y = Object.keys(data[0])[1];
+      xVals = data.map((el) => el[x]);
+      yVals = data.map((el) => el[y]);
+      colorVals = data.map((el) => 0);
+      points = data.map((el) => ({
+        x: el[x],
+        y: el[y],
+        color: 0
+      }));
+    }
     // For data with subsets (NOTE: expects 'id' and 'data' keys)
-    // else {
-    //   x = Object.keys(data[0]?.data[0])[0];
-    //   y = Object.keys(data[0]?.data[0])[1];
-    //   data.forEach((subset, i) => {
-    //   subset.data.forEach((coordinate) => {
-    //     xVals.push(coordinate[x]);
-    //     yVals.push(coordinate[y]);
-    //     colorVals.push(i);
-    //     points.push(
-    //       { 
-    //         x: coordinate[x],
-    //         y: coordinate[y],
-    //         color: i
-    //       });
-    //   });
-    //   subsets.push(subset.id);
-    // });
-    // }
+    else {
+      x = Object.keys(data[0]?.data[0])[0];
+      y = Object.keys(data[0]?.data[0])[1];
+      data.forEach((subset, i) => {
+      subset.data.forEach((coordinate) => {
+        xVals.push(coordinate[x]);
+        yVals.push(coordinate[y]);
+        colorVals.push(i);
+        points.push(
+          { 
+            x: coordinate[x],
+            y: coordinate[y],
+            color: i
+          });
+      });
+      subsets.push(subset.id);
+    });
+    }
   
-    $: I = range(xVals.length);
-    $: gaps = (d, i) => !isNaN(xVals[i]) && !isNaN(yVals[i]);
-    $: cleanData = points.map(gaps);
+    const I = range(xVals.length);
+    const gaps = (d, i) => !isNaN(xVals[i]) && !isNaN(yVals[i]);
+    const cleanData = points.map(gaps);
   
-    const xDomain = [8, 17];
-    const yDomain = [0, 10];
-    $: xScale = xType(xDomain, xRange);
-    $: yScale = yType(yDomain, yRange);
+    const xDomain = [xVals[0], xVals[xVals.length - 1]];
+    const yDomain = [0, Math.max(...yVals)];
+    const xScale = xType(xDomain, xRange);
+    const yScale = yType(yDomain, yRange);
+    const niceY = scaleLinear().domain([0, Math.max(...yVals)]).nice();
   
-    $: chartLine = line()
+    const chartLine = line()
       .defined(i => cleanData[i])
       .curve(curve)
       .x(i => xScale(xVals[i]))
@@ -141,12 +97,13 @@
       });
     }
   
-    $: pointsScaled = points.map((el) => [xScale(el.x), yScale(el.y), el.color]);
-    $: delaunayGrid = Delaunay.from(pointsScaled);
-    $: voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]);
+    const pointsScaled = points.map((el) => [xScale(el.x), yScale(el.y), el.color]);
+    const delaunayGrid = Delaunay.from(pointsScaled);
+    const voronoiGrid = delaunayGrid.voronoi([0, 0, width, height]);
     
-    $: xTicks = xScale.ticks(xScalefactor);
-    $: yTicks = yScale.ticks(yScalefactor);
+    const  xTicks = xScale.ticks(xScalefactor);
+    const  xTicksFormatted = xTicks.map((el) => el.getFullYear());
+    const  yTicks = niceY.ticks(yScalefactor);
   </script>
   
   <div class="chart-container">
@@ -206,7 +163,7 @@
             {#if verticalGrid}
               <line class="tick-grid" y2={-height + 70} />
             {/if}
-            <text font-size='8px' x={-marginLeft/4} y="20">{xTicks[i] + xFormat}</text>
+            <text font-size='8px' x={-marginLeft/4} y="20">{xTicksFormatted[i] + xFormat}</text>
           </g>
         {/each}
         <text x={width - marginLeft - marginRight - 40} y={marginBottom}>{xLabel}</text>
@@ -229,7 +186,7 @@
   {#if dotInfo}
     <div class="tooltip" style='position:absolute; left:{dotInfo[2].clientX + 12}px; top:{dotInfo[2].clientY + 12}px; pointer-events:none; background-color:{tooltipBackground}; color:{tooltipTextColor}'>
       {subsets ? subsets[points[dotInfo[1]].color] : ''}:  
-      {points[dotInfo[1]].x}: {points[dotInfo[1]].y.toFixed(2)}{yFormat}
+      {points[dotInfo[1]].x.getFullYear()}: {points[dotInfo[1]].y.toFixed(2)}{yFormat}
     </div>
   {/if}
   
