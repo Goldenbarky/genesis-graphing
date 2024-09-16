@@ -2,6 +2,8 @@
     import { getContext } from "svelte";
     import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
     import type { Writable } from "svelte/store";
+    import Login from "./Login.svelte";
+    import { drag } from "d3-drag";
 
     let sanity = 5;
 
@@ -9,24 +11,47 @@
         supabase: SupabaseClient;
         session: Writable<AuthSession | null>;
     }>("supabase");
+
+    const isUserAuthorized = async (id:string) => {
+        const { data: data } = await supabase.from("users").select("*").eq("id", id);
+        return (data !== null && data.length > 0);
+    }
 </script>
 <div class="container">
-    <div class="slidecontainer">
-        <div class="number-labels">
-            {#each Array(11) as _, i}
-                <div>
-                    {i}
-                </div>
-            {/each}
+    {#if !$session || !$session.user}
+    <div class="column">
+        You must be logged in to save values to the database, log in with Google now:
+        <div style="border: 2px solid">
+            <Login --text-size=1.5rem/>
         </div>
-        <input type="range" min="0" max="10" bind:value={sanity} class="slider" id="myRange">
-        <button class="button" on:click={async () => {
-            await supabase.from("data").insert({
-                owner_id: $session.user.id,
-                value: sanity
-            });
-        }}>Log Sanity</button>
     </div>
+        
+    {:else}
+        {#await isUserAuthorized($session.user.id)}
+            Fetching...
+        {:then authorized} 
+            {#if authorized}
+                <div class="slidecontainer">
+                    <div class="number-labels">
+                        {#each Array(11) as _, i}
+                            <div>
+                                {i}
+                            </div>
+                        {/each}
+                    </div>
+                    <input type="range" min="0" max="10" bind:value={sanity} class="slider" id="myRange">
+                    <button class="button" on:click={async () => {
+                        await supabase.from("data").insert({
+                            owner_id: $session.user.id,
+                            value: sanity
+                        });
+                    }}>Log Sanity</button>
+                </div>
+            {:else}
+                You are not currently authorized, simply spam Justin with requests to fix that
+            {/if}
+        {/await}
+    {/if}
 </div>
 
 <style>
@@ -47,6 +72,12 @@
     .button {
         color: white;
         background-color: #5A5A5A;
+    }
+    .column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
     }
     .slidecontainer {
         width: 100%; /* Width of the outside container */

@@ -44,7 +44,7 @@
     onMount(async () => {
         const { data: meData } = await supabase.from("eod_equations").select("*");
         meData?.forEach((eq) => {
-            let eq_data = JSON.parse(eq.eq_data);
+            let eq_data = eq.eq_data;
             coeffs = eq_data.coefs;
         });
 
