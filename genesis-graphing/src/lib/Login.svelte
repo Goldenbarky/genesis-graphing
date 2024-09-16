@@ -3,7 +3,6 @@
     import type { Writable } from "svelte/store";
     import { signInWithGoogle } from "./Supabase.svelte";
     import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
-    import ColorPicker from "svelte-awesome-color-picker";
 
     const { supabase, session } = getContext<{
         supabase: SupabaseClient;
