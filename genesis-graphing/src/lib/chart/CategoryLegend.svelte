@@ -1,5 +1,21 @@
-<script>
+<script lang="ts">
+    import { getContext, onMount } from "svelte";
+    import type { Writable } from "svelte/store";
+    import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
+
     export let legend_data, legend_color_function, shownPerson;
+
+    let people:{'id':string, 'display_name':string}[] = []
+
+    const { supabase, session } = getContext<{
+        supabase: SupabaseClient;
+        session: Writable<AuthSession | null>;
+    }>("supabase");
+
+    onMount(async () => {
+      const { data } = await supabase.from("users").select("*");
+      people = data;
+    })
   </script>
   <div>
     {#each legend_data as d, i}
@@ -14,7 +30,7 @@
     }}>
     <div
       style={`width:20px;height:20px;background-color:${legend_color_function(d)}`}></div>
-      {d[0] + d.slice(1).toLowerCase()}
+      {people.find(x => x.id === d)?.display_name}
     </div>
   {/each}
   </div>
