@@ -242,7 +242,7 @@
                         xoffset={10}
                         label={"Sanity ↑"}
                     />
-                    {#each Object.keys(data) as person, i}
+                    {#each Object.keys(data) as person, i (person)}
                         {#if !shownPerson || shownPerson === person}
                             {#each data[person].points as point, j}
                                 <circle
@@ -252,16 +252,17 @@
                                     fill={colors(person)}
                                 />
                             {/each}
-                            {#if data[person].line}
-                                <path
-                                    in:draw={{ duration: 2000 }}
-                                    shape-rendering="crispEdges"
-                                    d={lineGenerator(data[person].line)}
-                                    stroke={colors(person)}
-                                    stroke-width={1.5}
-                                    stroke-linecap="round"
-                                    fill="none" />
-                            {/if}
+                        {/if}
+                        
+                        {#if (!shownPerson || shownPerson === person) && data[person].line}
+                            <path
+                                in:draw={{ duration: 2000 }}
+                                shape-rendering="crispEdges"
+                                d={lineGenerator(data[person].line)}
+                                stroke={colors(person)}
+                                stroke-width={1.5}
+                                stroke-linecap="round"
+                                fill="none" />
                         {/if}
                     {/each}
                 </g>
