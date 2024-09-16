@@ -252,14 +252,16 @@
                                     fill={colors(person)}
                                 />
                             {/each}
-                            <path
-                                in:draw={{ duration: 2000 }}
-                                shape-rendering="crispEdges"
-                                d={lineGenerator(data[person].line)}
-                                stroke={colors(person)}
-                                stroke-width={1.5}
-                                stroke-linecap="round"
-                                fill="none" />
+                            {#if data[person].line}
+                                <path
+                                    in:draw={{ duration: 2000 }}
+                                    shape-rendering="crispEdges"
+                                    d={lineGenerator(data[person].line)}
+                                    stroke={colors(person)}
+                                    stroke-width={1.5}
+                                    stroke-linecap="round"
+                                    fill="none" />
+                            {/if}
                         {/if}
                     {/each}
                 </g>
