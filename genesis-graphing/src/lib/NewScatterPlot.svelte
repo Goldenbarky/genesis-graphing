@@ -86,10 +86,9 @@
         imported = await supabase.from("eod_equations").select("*");
         if (!imported.data) return;
 
-        const xs = linspace(8, 17, 100);
-        const line = imported.data.reduce((prev, b) => {
-            const ys = PolyCoefficients(xs, b.eq_data.coefs);
-            prev[b.owner_id] = xs.map((x, i) => [x, ys[i]]);
+        const line = imported.data.reduce((prev, { eq_data, owner_id }) => {
+            // const ys = PolyCoefficients(xs, eq_data.coefs);
+            prev[owner_id] = eq_data.points;
             return prev;
         }, {});
 
@@ -136,13 +135,6 @@
 
     }
 
-    $: if (data) {
-        people = Object.keys(data);
-
-        colors = scaleOrdinal()
-            .range(people.map((_) => colorGen.next().value))
-            .domain(people);
-    }
     const colorGen = randomColor();
 
     $: lineGenerator = line()
@@ -153,6 +145,12 @@
     $: if (data && !done) {
         shownPerson = null;
         done = true;
+        
+        people = Object.keys(data);
+
+        colors = scaleOrdinal()
+            .range(people.map((_) => colorGen.next().value))
+            .domain(people);
     }
 </script>
 
