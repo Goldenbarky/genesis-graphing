@@ -2,6 +2,7 @@
     import { getContext, onMount } from "svelte";
     import { csv } from "d3-fetch";
     import { scaleLinear, scaleLog, scaleSqrt, scaleOrdinal } from "d3-scale";
+    import { regressionPoly } from 'd3-regression';
     import { extent } from "d3-array";
     import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
     import type { Writable } from "svelte/store";
@@ -16,7 +17,7 @@
 
     // 1. Getting the data
 
-    let data: Record<string, { line: [number, number], points: { sanity: number, time_stamp: number }[] }>;
+    let data: Record<string, { line: [number, number], points: { sanity: number, time_stamp: number }[], order: number }>;
     const { supabase, session } = getContext<{
         supabase: SupabaseClient;
         session: Writable<AuthSession | null>;
@@ -59,74 +60,54 @@
             yVals.push(y);
         })
 
-        console.log(yVals);
-        
         return yVals;
     }
+
+    const refreshData = async () => {
+        let imported = await supabase
+            .from("data")
+            .select("*");
+        if (!imported.data) return;
+
+        const points = imported.data.reduce((prev, x) => {
+            const date = new Date(x.created_at);
+            const time = date.toTimeString();
+            let b = [];
+            if (prev[x.owner_id]) {
+                b = prev[x.owner_id];
+            }
+            prev[x.owner_id] = [...b, {
+                time_stamp: timestampToHourFraction(time),
+                sanity: x.value,
+            }];
+            return prev;
+        }, {});
+
+        imported = await supabase.from("eod_equations").select("*");
+        if (!imported.data) return;
+
+        const xs = linspace(8, 17, 100);
+        const line = imported.data.reduce((prev, b) => {
+            const ys = PolyCoefficients(xs, b.eq_data.coefs);
+            prev[b.owner_id] = xs.map((x, i) => [x, ys[i]]);
+            return prev;
+        }, {});
+
+        data = Object.keys(points).reduce((prev, x) => {
+            prev[x] = {
+                line: line[x],
+                points: points[x],
+            };
+            return prev;
+        }, {});
+    };
 
     // We will use csv from d3 to fetch the data and we'll sort it by descending gdp
     // download data on: https://datavisualizationwithsvelte.com/data/world_bank.csv
     onMount(() => {
-        supabase
-            .from("data")
-            .select("*")
-            .then((imported) => {
-                if (!imported.data) return;
-
-                const points = imported.data.reduce((prev, x) => {
-                    const date = new Date(x.created_at);
-                    const time = date.toTimeString();
-                    let b = [];
-                    if (prev[x.owner_id]) {
-                        b = prev[x.owner_id];
-                    }
-                    prev[x.owner_id] = [...b, {
-                        time_stamp: timestampToHourFraction(time),
-                        sanity: x.value,
-                    }];
-                    return prev;
-                }, {});
-                // d["columns"] = ["sanity", "time_stamp", "person"];
-                
-                supabase.from("eod_equations").select("*")
-                    .then((imported) => {
-                        if (!imported.data) return;
-
-                        const xs = linspace(8, 17, 100);
-                        const line = imported.data.reduce((prev, b) => {
-                            const ys = PolyCoefficients(xs, b.eq_data.coefs);
-                            console.log(b.eq_data.coefs);
-                            prev[b.owner_id] = xs.map((x, i) => [x, ys[i]]);
-                            return prev;
-                        }, {});
-
-                        data = Object.keys(points).reduce((prev, x) => {
-                            prev[x] = {
-                                line: line[x],
-                                points: points[x]
-                            };
-                            return prev;
-                        }, {});
-                    });
-            });
-        
-        
-        // we have to turn data into the following
-        // [
-        //  0-inf: {
-        //   col1: val
-        //  },
-        //  columns: [
-        //   "col1"
-        //  ]
-        // ]
-        // csv("https://datavisualizationwithsvelte.com/data/world_bank.csv")
-        //     .then((unsorted_data) =>
-        //         unsorted_data.sort((a, b) => b.gdp - a.gdp),
-        //     )
-        //     .then((sorted_data) => (data = sorted_data));
+        refreshData().then(() => {});
     });
-    let shownPerson = null;
+    let shownPerson = 'banana';
 
     // 2. Dimensions, Margins & Scales
     let width;
@@ -167,6 +148,12 @@
     $: lineGenerator = line()
         .x((d) => xScale(+d[0]))
         .y((d) => yScale(+d[1]));
+
+    let done = false;
+    $: if (data && !done) {
+        shownPerson = null;
+        done = true;
+    }
 </script>
 
 <div class="my-grid" bind:clientWidth={width}>
@@ -203,7 +190,7 @@
                     <h3 style="margin-bottom:1px;color:rgb(17,24,39);">
                         <!-- {found.person} -->
                     </h3>
-                    Sanity: {Number(found.sanity)}<br />
+                    Sanity: {Number(+found.sanity)}<br />
                     Time: {Number(+found.time_stamp).toFixed(2)}
                 </div>
             </Quadtree>
@@ -264,6 +251,7 @@
                                 stroke-linecap="round"
                                 fill="none" />
                         {/if}
+                        
                     {/each}
                 </g>
                 <g transform="translate({width - margin.right},130)">

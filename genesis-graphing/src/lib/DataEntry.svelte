@@ -5,6 +5,8 @@
     import Login from "./Login.svelte";
     import { drag } from "d3-drag";
 
+    export let dirtied: number;
+
     let sanity = 5;
 
     const { supabase, session } = getContext<{
@@ -45,6 +47,7 @@
                             owner_id: $session.user.id,
                             value: sanity
                         });
+                        dirtied += 1;
                     }}>Log Sanity</button>
                 </div>
             {:else}

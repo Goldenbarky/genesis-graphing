@@ -5,6 +5,8 @@
     import NewScatterPlot from "./lib/NewScatterPlot.svelte";
     import ScatterPlot from "./lib/ScatterPlot.svelte";
 	import Supabase from "./lib/Supabase.svelte";
+
+    let dirtied = 1;
 </script>
 
 <main>
@@ -19,13 +21,15 @@
 				</div>
 				<div class="main-window">
 					<div class="graph">
-                        <NewScatterPlot />
+                        {#key dirtied}
+                            <NewScatterPlot />
+                        {/key}
 					</div>
 					<div class="side-window">
 						<div>
 							
 						</div>
-						<DataEntry/>
+						<DataEntry bind:dirtied />
 					</div>
 				</div>
 			</div>
