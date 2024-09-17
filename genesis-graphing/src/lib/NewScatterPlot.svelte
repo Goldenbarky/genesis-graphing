@@ -89,6 +89,7 @@
         const line = imported.data.reduce((prev, { eq_data, owner_id }) => {
             // const ys = PolyCoefficients(xs, eq_data.coefs);
             prev[owner_id] = eq_data.points;
+            console.log(owner_id, eq_data.coefs);
             return prev;
         }, {});
 
@@ -145,7 +146,7 @@
     $: if (data && !done) {
         shownPerson = null;
         done = true;
-        
+
         people = Object.keys(data);
 
         colors = scaleOrdinal()
