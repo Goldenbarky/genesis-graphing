@@ -2,7 +2,6 @@
     import { getContext, onMount } from "svelte";
     import { csv } from "d3-fetch";
     import { scaleLinear, scaleLog, scaleSqrt, scaleOrdinal } from "d3-scale";
-    import { regressionPoly } from 'd3-regression';
     import { extent } from "d3-array";
     import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
     import type { Writable } from "svelte/store";
@@ -107,7 +106,7 @@
     onMount(() => {
         refreshData().then(() => {});
     });
-    let shownPerson = 'banana';
+    export let shownPerson = 'banana';
 
     // 2. Dimensions, Margins & Scales
     let width;
@@ -117,7 +116,8 @@
     const yDomain = [0, 10];
     const radius = 5;
 
-    let xScale, yScale, radiusScale, colors, people, allPoints;
+    let xScale, yScale, radiusScale, allPoints;
+    export let colors, people;
 
     // We will be using scale functions from d3 to map our data points
     // within the dimensions of our svg.
@@ -207,6 +207,7 @@
                         {height}
                         {margin}
                         scale={yScale}
+                        tick_number={11}
                         position="left"
                     />
                     <Labels
@@ -250,7 +251,6 @@
                                 stroke-linecap="round"
                                 fill="none" />
                         {/if}
-                        
                     {/each}
                 </g>
                 <g transform="translate({width - margin.right},130)">
@@ -258,12 +258,6 @@
                 </g>
             </svg>
     </div>
-    <CategoryLegend
-        bind:shownPerson
-        legend_data={people}
-        legend_color_function={colors}
-        space={80}
-    />
     {/if}
 </div>
 

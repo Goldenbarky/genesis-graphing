@@ -1,12 +1,14 @@
 <script lang="ts">
+    import CategoryLegend from "./lib/chart/CategoryLegend.svelte";
 	import DataEntry from "./lib/DataEntry.svelte";
-    import LinePlot from "./lib/LinePlot.svelte";
 	import Login from "./lib/Login.svelte";
     import NewScatterPlot from "./lib/NewScatterPlot.svelte";
-    import ScatterPlot from "./lib/ScatterPlot.svelte";
 	import Supabase from "./lib/Supabase.svelte";
 
     let dirtied = 1;
+	let shownPerson = 'bananananana';
+	let people: any;
+	let colors: any;
 </script>
 
 <main>
@@ -22,18 +24,24 @@
 				<div class="main-window">
 					<div class="graph">
                         {#key dirtied}
-                            <NewScatterPlot />
+                            <NewScatterPlot 
+								bind:shownPerson={shownPerson}
+								bind:people={people}
+								bind:colors={colors}
+							/>
                         {/key}
 					</div>
 					<div class="side-window">
-						<div>
-							
-						</div>
+						<CategoryLegend
+							bind:shownPerson
+							legend_data={people}
+							legend_color_function={colors}
+							space={80}
+						/>
 						<DataEntry bind:dirtied />
 					</div>
 				</div>
 			</div>
-			
 		</div>
 	</Supabase>
 </main>
@@ -57,6 +65,7 @@
 		grid-template-columns: 1fr;
 		width: 100%;
 		height: 100%;
+		justify-items: center;
 	}
 	.header {
 		font-size: 2rem;
