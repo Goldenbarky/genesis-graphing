@@ -6,7 +6,7 @@
 	export let legend_data, legend_color_function, shownPerson;
 
 	let people: { id: string; display_name: string }[] = [];
-	let equation_data: {owner_id: string, eq_data:{type:string, coefs:string[]}}[] = [];
+	let equation_data: {owner_id: string, eq_data:{equation:string}}[] = [];
 
 	const { supabase, session } = getContext<{
 		supabase: SupabaseClient;
@@ -25,7 +25,7 @@
 <div class="legend">
 	{#if legend_data}
 		{#each legend_data as d, i}
-			{@const coeffs = equation_data.find(x => x.owner_id === d)?.eq_data.coefs.reverse()}
+			{@const equation = equation_data.find(x => x.owner_id === d)?.eq_data.equation}
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div class="legend-entry" 
@@ -41,9 +41,10 @@
 					<div class="name">
 						{people.find((x) => x.id === d)?.display_name}
 					</div>
-					{#if coeffs}
+					{#if equation}
 						<div class="equation">
-							{#each coeffs as coeff, i}
+							{equation}
+							<!-- {#each coeffs as coeff, i}
 								{#if parseFloat(coeff) !== 0}
 									{coeff}
 									{#if coeffs.length - i - 1 !== 0}
@@ -53,13 +54,13 @@
 										+
 									{/if}
 								{/if}
-							{/each}
+							{/each} -->
 						</div>
 					{/if}
 				</div>
 			</div>
 			{#if i < legend_data.length - 1}
-				<div style="height: 2rem; flex-shrink: 0;"/>
+				<div class="legend-divider"/>
 			{/if}
 		{/each}
 	{/if}
@@ -74,6 +75,8 @@
 		box-sizing: border-box;
 		margin-bottom: 1rem;
 		padding: 1rem;
+		max-height: 83vh;
+		overflow-y: auto;
 	}
 	.legend-entry{
 		display: flex;
@@ -81,6 +84,10 @@
 		width: 100%;
 		height: 100%;
 		cursor: pointer;
+	}
+	.legend-divider {
+		max-height: 5rem;
+		min-height: 0.5rem;
 	}
 	.name {
 		color: black;
