@@ -17,6 +17,7 @@
     // 1. Getting the data
 
     let data: Record<string, { line: [number, number], points: { sanity: number, time_stamp: number }[], order: number }>;
+    let names;
     const { supabase, session } = getContext<{
         supabase: SupabaseClient;
         session: Writable<AuthSession | null>;
@@ -70,13 +71,13 @@
 
         const points = imported.data.reduce((prev, x) => {
             const date = new Date(x.created_at);
-            const time = date.toTimeString();
             let b = [];
             if (prev[x.owner_id]) {
                 b = prev[x.owner_id];
             }
             prev[x.owner_id] = [...b, {
-                time_stamp: timestampToHourFraction(time),
+                person_id: x.owner_id,
+                time_stamp: date,
                 sanity: x.value,
             }];
             return prev;
@@ -103,8 +104,11 @@
 
     // We will use csv from d3 to fetch the data and we'll sort it by descending gdp
     // download data on: https://datavisualizationwithsvelte.com/data/world_bank.csv
-    onMount(() => {
-        refreshData().then(() => {});
+    onMount(async () => {
+        await refreshData();
+
+      	const { data:data } = await supabase.from("users").select("*");
+		names = data;
     });
     export let shownPerson = 'banana';
 
@@ -156,7 +160,7 @@
 </script>
 
 <div class="my-grid" bind:clientWidth={width}>
-    {#if data && allPoints && width}
+    {#if data && allPoints && width && names}
     <div style="position:relative;">
             <Quadtree
                 data={allPoints}
@@ -186,11 +190,11 @@
                     style="top:{y + 5}px;left:{x.square +
                         10}px;display: {visible ? 'block' : 'none'};"
                 >
-                    <h3 style="margin-bottom:1px;color:rgb(17,24,39);">
-                        <!-- {found.person} -->
-                    </h3>
+                    <div style="margin-bottom:1px; font-size: 1rem;">
+                        {names.find(x => x.id === found.person_id).display_name}
+                    </div>
                     Sanity: {Number(+found.sanity)}<br />
-                    Time: {Number(+found.time_stamp).toFixed(2)}
+                    Time: {found.time_stamp.toLocaleTimeString()}
                 </div>
             </Quadtree>
             <svg {width} {height} style="overflow:visible">
@@ -233,7 +237,7 @@
                         {#if !shownPerson || shownPerson === person}
                             {#each data[person].points as point, j}
                                 <circle
-                                    cx={xScale(+point.time_stamp)}
+                                    cx={xScale(timestampToHourFraction(point.time_stamp.toTimeString()))}
                                     cy={yScale(+point.sanity)}
                                     r={radiusScale}
                                     fill={colors(person)}

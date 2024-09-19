@@ -5,7 +5,7 @@
 
 	export let legend_data, legend_color_function, shownPerson;
 
-	let people: { id: string; display_name: string }[] = [];
+	export let people: { id: string; display_name: string }[] = [];
 	let equation_data: {owner_id: string, eq_data:{equation:string}}[] = [];
 
 	const { supabase, session } = getContext<{
