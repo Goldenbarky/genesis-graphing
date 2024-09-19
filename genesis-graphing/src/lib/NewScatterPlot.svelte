@@ -109,6 +109,12 @@
 
       	const { data:data } = await supabase.from("users").select("*");
 		names = data;
+
+        const perp = names?.find(x => x.id === $session?.user.id && !x.color);
+        if (perp) {
+            names = [...names.filter(x => x.id !== perp.id), await supabase.from('users').update({ ...perp, color: colorGen.next().value }).eq('id', perp.id).select('*')];
+        }
+
     });
     export let shownPerson = 'banana';
 
@@ -127,7 +133,7 @@
     // within the dimensions of our svg.
     // Set the scale functions when the data is available.
     $: if (data) {
-        allPoints = shownPerson ? data[shownPerson].points : Object.keys(data).flatMap(d => data[d].points);
+        allPoints = shownPerson && shownPerson !== 'bananananana' ? data[shownPerson].points : Object.keys(data).flatMap(d => data[d].points);
         xScale = scaleLinear()
             .domain(xDomain)
             .range([margin.left, width - margin.right]);
@@ -147,15 +153,15 @@
         .y((d) => yScale(+d[1]));
 
     let done = false;
-    $: if (data && !done) {
+    $: if (data && !done && names) {
         shownPerson = null;
         done = true;
 
         people = Object.keys(data);
 
         colors = scaleOrdinal()
-            .range(people.map((_) => colorGen.next().value))
-            .domain(people);
+            .range(names.map((c) => c.color ?? colorGen.next().value))
+            .domain(names.map((c) => c.id));
     }
 </script>
 
