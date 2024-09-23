@@ -3,7 +3,8 @@
 	import type { Writable } from "svelte/store";
 	import type { AuthSession, SupabaseClient } from "@supabase/supabase-js";
 
-	export let legend_data, legend_color_function, shownPerson;
+	export let legend_data, shownPerson;
+	export let colors = new Map();
 
 	export let people: { id: string; display_name: string }[] = [];
 	let equation_data: {owner_id: string, eq_data:{equation:string}}[] = [];
@@ -24,45 +25,36 @@
 
 <div class="legend">
 	{#if legend_data}
-		{#each legend_data as d, i}
-			{@const equation = equation_data.find(x => x.owner_id === d)?.eq_data.equation}
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div class="legend-entry" 
-				on:click={() => {
-					if (!shownPerson || shownPerson !== d) {
-						shownPerson = d;
-					} else {
-						shownPerson = null;
-					}
-				}}
-			>
-				<div class="color-block" style={`background-color:${legend_color_function(d)}`}>
-					<div class="name">
-						{people.find((x) => x.id === d)?.display_name}
-					</div>
-					{#if equation}
-						<div class="equation">
-							{equation}
-							<!-- {#each coeffs as coeff, i}
-								{#if parseFloat(coeff) !== 0}
-									{coeff}
-									{#if coeffs.length - i - 1 !== 0}
-										x<sup>{coeffs.length - i - 1}</sup>
-									{/if}
-									{#if i < coeffs.length - 1 && (i+1 < coeffs.length && parseFloat(coeffs[i+1]) > 0)}
-										+
-									{/if}
-								{/if}
-							{/each} -->
+		{#key colors}
+			{#each legend_data as d, i}
+				{@const equation = equation_data.find(x => x.owner_id === d)?.eq_data.equation}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div class="legend-entry" 
+					on:click={() => {
+						if (!shownPerson || shownPerson !== d) {
+							shownPerson = d;
+						} else {
+							shownPerson = null;
+						}
+					}}
+				>
+					<div class="color-block" style={`background-color:${colors.get(d)}`}>
+						<div class="name">
+							{people.find((x) => x.id === d)?.display_name}
 						</div>
-					{/if}
+						{#if equation}
+							<div class="equation">
+								{equation}
+							</div>
+						{/if}
+					</div>
 				</div>
-			</div>
-			{#if i < legend_data.length - 1}
-				<div class="legend-divider"/>
-			{/if}
-		{/each}
+				{#if i < legend_data.length - 1}
+					<div class="legend-divider"/>
+				{/if}
+			{/each}
+		{/key}
 	{/if}
 </div>
 

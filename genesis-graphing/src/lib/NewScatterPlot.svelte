@@ -127,7 +127,7 @@
     const radius = 5;
 
     let xScale, yScale, radiusScale, allPoints;
-    export let colors, people;
+    export let colors = new Map<string, string>(), people;
 
     // We will be using scale functions from d3 to map our data points
     // within the dimensions of our svg.
@@ -158,10 +158,6 @@
         done = true;
 
         people = Object.keys(data);
-
-        colors = scaleOrdinal()
-            .range(names.map((c) => c.color ?? colorGen.next().value))
-            .domain(names.map((c) => c.id));
     }
 </script>
 
@@ -246,7 +242,7 @@
                                     cx={xScale(timestampToHourFraction(point.time_stamp.toTimeString()))}
                                     cy={yScale(+point.sanity)}
                                     r={radiusScale}
-                                    fill={colors(person)}
+                                    fill={colors.get(person)}
                                 />
                             {/each}
                         {/if}
@@ -256,7 +252,7 @@
                                 in:draw={{ duration: 2000 }}
                                 shape-rendering="crispEdges"
                                 d={lineGenerator(data[person].line)}
-                                stroke={colors(person)}
+                                stroke={colors.get(person)}
                                 stroke-width={1.5}
                                 stroke-linecap="round"
                                 fill="none" />

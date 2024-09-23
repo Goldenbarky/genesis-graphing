@@ -1,5 +1,6 @@
 <script lang="ts">
     import CategoryLegend from "./lib/chart/CategoryLegend.svelte";
+    import ColorChanger from "./lib/ColorChanger.svelte";
 	import DataEntry from "./lib/DataEntry.svelte";
 	import Login from "./lib/Login.svelte";
     import NewScatterPlot from "./lib/NewScatterPlot.svelte";
@@ -16,6 +17,11 @@
 		<div style="display:flex; flex-direction:row; width:100%; height:100%;">
 			<div class="tool-panel">
 				<Login/>
+				<div style="height: 0.5rem;"/>
+				<ColorChanger
+					bind:colors={colors}
+					bind:dirtied
+				/>
 			</div>
 			<div style="width:100%; display:flex; flex-direction:column;">
 				<div class="header">
@@ -35,7 +41,7 @@
 						<CategoryLegend
 							bind:shownPerson
 							legend_data={people}
-							legend_color_function={colors}
+							bind:colors={colors}
 							space={80}
 						/>
 						<DataEntry bind:dirtied />
