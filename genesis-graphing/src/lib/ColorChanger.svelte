@@ -40,7 +40,7 @@
     <div class="popup" style="visibility:{popup ? 'visible': 'hidden'}">
         <ColorPicker
             position="responsive"
-            --cp-text-color="white"
+            --cp-text-color="black"
             bind:hex={color}
             on:input={(event) => {
                 colors.set($session?.user.id, event.detail.hex);
