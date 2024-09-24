@@ -48,8 +48,6 @@
         // The coefficients must be in ascending order (``x**0`` to ``x**o``). 
 
         let o = coeffs.length;
-        console.log(`# This is a polynomial of order ${o}.`);
-
         let yVals:number[] = [];
 
         xVals.forEach(x => {
@@ -89,7 +87,6 @@
         const line = imported.data.reduce((prev, { eq_data, owner_id }) => {
             // const ys = PolyCoefficients(xs, eq_data.coefs);
             prev[owner_id] = eq_data.points;
-            console.log(owner_id, eq_data.coefs);
             return prev;
         }, {});
 

@@ -23,8 +23,6 @@
         // The coefficients must be in ascending order (``x**0`` to ``x**o``). 
 
         let o = coeffs.length;
-        console.log(`# This is a polynomial of order ${o}.`);
-
         let yVals:number[] = [];
 
         xVals.forEach(x => {

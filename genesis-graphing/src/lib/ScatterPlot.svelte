@@ -38,12 +38,9 @@
         const { data: meData } = await supabase.from("data").select("*");
         let myX: number[] = [];
         let myY: number[] = [];
-        console.log(meData);
         meData?.forEach((point) => {
             let date = new Date(point.created_at);
             let time = date.toTimeString();
-
-            console.log(time);
 
             myX.push(timestampToHourFraction(time));
             myY.push(point.value);
@@ -53,8 +50,6 @@
             y: myY,
         };
     });
-
-    $: console.log(data);
     
     const r = 3; // (fixed) radius of dots, in pixels
     const marginTop = 20; // the top margin, in pixels
