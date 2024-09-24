@@ -69,7 +69,7 @@
                         </div>
                         <input type="range" min="0" max="10" bind:value={sanity} class="slider" id="myRange">
                         <div class="slider-range">
-                            {#each Array(16) as _}
+                            {#each Array(11) as _}
                                 <div class="slider-tick"/>
                             {/each}
                         </div>
