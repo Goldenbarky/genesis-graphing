@@ -68,6 +68,11 @@
                             {/each}
                         </div>
                         <input type="range" min="0" max="10" bind:value={sanity} class="slider" id="myRange">
+                        <div class="slider-range">
+                            {#each Array(16) as _}
+                                <div class="slider-tick"/>
+                            {/each}
+                        </div>
                         <button class="button" on:click={async () => {
                             await supabase.from("data").insert({
                                 owner_id: $session.user.id,
