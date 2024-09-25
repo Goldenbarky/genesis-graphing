@@ -117,10 +117,10 @@
 
     // 2. Dimensions, Margins & Scales
     let width;
-    const height = 800;
+    const height = 1000;
     const margin = { top: 40, right: 20, bottom: 20, left: 35 };
     const xDomain = [8, 17];
-    const yDomain = [0, 10];
+    const yDomain = [-5, 10];
     const radius = 5;
 
     let xScale, yScale, radiusScale, allPoints;
@@ -232,6 +232,14 @@
                         xoffset={10}
                         label={"Sanity ↑"}
                     />
+                    <path
+                        in:draw={{ duration: 2000 }}
+                        shape-rendering="crispEdges"
+                        d={lineGenerator([[8, 0], [17, 0]])}
+                        stroke="#ffffff"
+                        stroke-width={0.5}
+                        stroke-linecap="round"
+                        fill="none" />
                     {#each Object.keys(data) as person, i (person)}
                         {#if !shownPerson || shownPerson === person}
                             {#each data[person].points as point, j}
